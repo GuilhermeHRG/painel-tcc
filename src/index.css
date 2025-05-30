@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.filtros {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+select, input[type="date"] {
+  margin-left: 8px;
+  padding: 4px;
+}
+
+.grafico {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.log {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  font-size: 14px;
+}
+
+.log li {
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
