@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { format, isWithinInterval } from 'date-fns';
 import type { TooltipItem } from 'chart.js';
-import './app.css';
+import './App.css';
 
 type Relatorio = {
   fileDurations: Record<string, number>;
@@ -74,16 +74,16 @@ function App() {
       (!dataInicio && !dataFim)
         ? isWithinInterval(dataRegistro, { start: inicioPadrao, end: fimPadrao })
         : isWithinInterval(dataRegistro, {
-            start: dataInicio ? new Date(dataInicio) : new Date('2000-01-01'),
-            end: dataFim ? new Date(dataFim + 'T23:59:59') : new Date('2100-01-01')
-          });
+          start: dataInicio ? new Date(dataInicio) : new Date('2000-01-01'),
+          end: dataFim ? new Date(dataFim + 'T23:59:59') : new Date('2100-01-01')
+        });
 
     return dentroDoUsuario && dentroDaData && dentroDoProjeto;
   });
 
   const totalProdutivoMs = dadosFiltrados.reduce((acc, r) =>
     acc + Object.values(r.fileDurations).reduce((a, b) => a + b, 0)
-  , 0);
+    , 0);
 
   const totalInatividadeMs = dadosFiltrados.reduce((acc, r) =>
     acc + r.inactivityDuration, 0
@@ -100,12 +100,12 @@ function App() {
         (!dataInicio || !dataFim)
           ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
           : isWithinInterval(data, {
-              start: new Date(dataInicio),
-              end: new Date(dataFim + 'T23:59:59'),
-            });
+            start: new Date(dataInicio),
+            end: new Date(dataFim + 'T23:59:59'),
+          });
       return dentroData;
     }).length
-  , 0);
+    , 0);
 
   const totalTempo = totalProdutivoMs + totalInatividadeMs;
   const percentualProdutivo = totalTempo ? (totalProdutivoMs / totalTempo) * 100 : 0;
@@ -153,13 +153,7 @@ function App() {
         <div className="kpi"><h3>Registros</h3><p>{totalAcoes}</p></div>
       </div>
 
-      <div className="regua">
-        <div className="regua-bar">
-          <div className="produtivo" style={{ width: `${percentualProdutivo}%` }} />
-          <div className="inativo" style={{ width: `${100 - percentualProdutivo}%` }} />
-        </div>
-        <p>{percentualProdutivo.toFixed(1)}% produtivo</p>
-      </div>
+
 
       <div className="filtros">
         <label>Usuário:</label>
@@ -180,6 +174,13 @@ function App() {
         <label>Até:</label>
         <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} />
       </div>
+      <div className="regua">
+        <div className="regua-bar">
+          <div className="produtivo" style={{ width: `${percentualProdutivo}%` }} />
+          <div className="inativo" style={{ width: `${100 - percentualProdutivo}%` }} />
+        </div>
+        <p>{percentualProdutivo.toFixed(1)}% produtivo nesta data</p>
+      </div>
 
       <div className="grafico">
         <Bar data={chartData} options={chartOptions} />
@@ -187,9 +188,12 @@ function App() {
 
       <h2>Atividades Recentes</h2>
 
+
       <div className="filtros">
         <label>Tipo de Ação:</label>
-        {Array.from(new Set(dadosFiltrados.flatMap(r => r.activityLog.map(log => log.action)))).map(tipo => (
+        {Array.from(new Set(
+          dadosFiltrados.flatMap(r => r.activityLog.map(log => log.action.trim()))
+        )).map(tipo => (
           <label key={tipo}>
             <input
               type="checkbox"
@@ -208,7 +212,7 @@ function App() {
       </div>
 
       <ul className="log">
-        {dadosFiltrados.flatMap(r =>
+        {dadosFiltrados.flatMap((r) =>
           r.activityLog
             .filter(log => {
               const data = new Date(log.time);
@@ -216,14 +220,19 @@ function App() {
                 (!dataInicio || !dataFim)
                   ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
                   : isWithinInterval(data, {
-                      start: new Date(dataInicio),
-                      end: new Date(dataFim + 'T23:59:59')
-                    });
-              const dentroTipo = selectedActions.length === 0 || selectedActions.includes(log.action);
+                    start: new Date(dataInicio),
+                    end: new Date(dataFim + 'T23:59:59')
+                  });
+
+              const logAction = log.action.trim().toLowerCase();
+              const dentroTipo =
+                selectedActions.length === 0 ||
+                selectedActions.map(a => a.toLowerCase()).includes(logAction);
+
               return dentroData && dentroTipo;
             })
-            .map(log => (
-              <li key={`${log.time}-${log.action}-${log.file}`}>
+            .map((log, logIndex) => (
+              <li key={`${r.userId}-${r.timestamp}-${logIndex}`}>
                 {format(new Date(log.time), 'dd/MM/yyyy HH:mm:ss')} — <strong>{log.action}</strong> em <em>{log.file.split(/[/\\]/).pop()}</em> {log.duration && ` (${log.duration})`}
               </li>
             ))
@@ -238,14 +247,20 @@ function App() {
               (!dataInicio || !dataFim)
                 ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
                 : isWithinInterval(data, {
-                    start: new Date(dataInicio),
-                    end: new Date(dataFim + 'T23:59:59')
-                  });
-            const dentroTipo = selectedActions.length === 0 || selectedActions.includes(log.action);
+                  start: new Date(dataInicio),
+                  end: new Date(dataFim + 'T23:59:59')
+                });
+
+            const logAction = log.action.trim().toLowerCase();
+            const dentroTipo =
+              selectedActions.length === 0 ||
+              selectedActions.map(a => a.toLowerCase()).includes(logAction);
+
             return dentroData && dentroTipo;
           }).length
-        , 0)
+          , 0)
       } registros exibidos</p>
+
 
       <button onClick={() => {
         const data = JSON.stringify(dadosFiltrados, null, 2);
