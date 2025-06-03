@@ -167,29 +167,16 @@ const chartOptions = {
   }
 };
 
-const Sidebar = ({ onLogout, menuActive, toggleMenu }: { 
-  onLogout: () => void, 
-  menuActive: boolean, 
-  toggleMenu: () => void 
-}) => (
-  <>
-    <div className={`sidebar-overlay ${menuActive ? 'active' : ''}`} onClick={toggleMenu}></div>
-    <aside className={`sidebar ${menuActive ? 'active' : ''}`}>
-      <div className="sidebar-header">
-        <button className="sidebar-close" onClick={toggleMenu}>
-          &times;
-        </button>
-        <img src={logo} alt="Logo" className="sidebar-logo" />
-        <h2>Time to Code</h2>
-      </div>
-      <div className="sidebar-content">
-        {/* Adicione aqui itens de menu se necessário */}
-      </div>
-      <button className="sidebar-logout" onClick={onLogout}>
-        Sair
-      </button>
-    </aside>
-  </>
+const Header = ({ onLogout }: { onLogout: () => void }) => (
+  <header className="header">
+    <div className="header-content">
+      <img src={logo} alt="Logo" className="header-logo" />
+      <h2 className="header-title">Painel de relatórios</h2>
+    </div>
+    <button className="header-logout" onClick={onLogout}>
+      Sair
+    </button>
+  </header>
 );
 
 const KPICard = ({ title, value }: { title: string; value: string | number }) => (
@@ -317,7 +304,6 @@ const AppContent = () => {
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
-  const [menuActive, setMenuActive] = useState(false);
   
   const navigate = useNavigate();
   const { relatorios, users, projects } = useRelatoriosData();
@@ -342,9 +328,6 @@ const AppContent = () => {
     navigate("/login");
   };
 
-  const toggleMenu = () => {
-    setMenuActive(!menuActive);
-  };
   
   const hoje = new Date();
   const inicioPadrao = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
@@ -389,18 +372,13 @@ const AppContent = () => {
 
   return (
     <div className="main-content">
-      <button className="menu-toggle" onClick={toggleMenu}>
-        ☰
-      </button>
       
-      <Sidebar 
+      
+      <Header 
         onLogout={handleLogout} 
-        menuActive={menuActive} 
-        toggleMenu={toggleMenu} 
       />
       
       <main className="container">
-        <h1>Painel de Relatórios</h1>
         
         <section className="kpis">
           <KPICard title="Tempo Produtivo" value={formatTime(totalProdutivoMs)} />
