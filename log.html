@@ -1,0 +1,89 @@
+
+        <html>
+        <head>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <style>
+                body { font-family: Arial, sans-serif; background: #36393f; color: white; padding: 20px; }
+                .container { background: #2f3136; padding: 15px; border-radius: 8px; }
+                .log { background: #202225; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; }
+                .log-entry { font-size: 12px; padding: 5px 0; border-bottom: 1px solid #40444b; }
+                .stats { margin-top: 20px; }
+                canvas { background: white; border-radius: 8px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Monitor de Trabalho</h2>
+                <p><strong>Arquivo atual:</strong> Nenhum arquivo</p>
+                <p><strong>Tempo de edição atual:</strong> Inativo</p>
+                <div class="stats">
+                    <p><strong>Tempo total de edição:</strong> 00:00:00</p>
+                    <p><strong>Tempo médio por arquivo:</strong> 00:00:00</p>
+                    <p><strong>Tempo total de inatividade:</strong> 00:00:11</p>
+                </div>
+                <canvas id="chart"></canvas>
+                <p style="margin-top: 10px; font-size: 12px; color: #aaa;">
+                    Atualizado em: <span id="dataAtualizada"></span>
+                </p>
+            </div>
+
+            <div class="log">
+                <strong>Atividades Recentes:</strong>
+                <div class="log-entry">03/06/2025, 19:27:53 - inatividade detectada: <strong></strong> (---)</div><div class="log-entry">03/06/2025, 19:28:04 - retorno da inatividade: <strong></strong> (00:00:11)</div>
+
+            </div>
+
+            <script>
+                function formatChartTime(ms) {
+                    const sec = Math.floor(ms / 1000) % 60;
+                    const min = Math.floor(ms / (1000 * 60)) % 60;
+                    const hours = Math.floor(ms / (1000 * 60 * 60));
+                    return `${String(hours).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                }
+
+                window.addEventListener('message', event => {
+                    const data = event.data;
+                    const ctx = document.getElementById('chart').getContext('2d');
+                    const labels = Object.keys(data.fileDurations).map(file => file.split(/[\\/]/).pop());
+                    const values = Object.values(data.fileDurations);
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Tempo de Edição',
+                                data: values,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: context => formatChartTime(context.raw)
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Atualiza a data no formato pt-BR
+                    const dataAtual = new Date();
+                    const formatado = dataAtual.toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    document.getElementById('dataAtualizada').innerText = formatado;
+                });
+            </script>
+        </body>
+        </html>
+    
