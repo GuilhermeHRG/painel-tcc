@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { format, isWithinInterval } from 'date-fns';
 import type { TooltipItem } from 'chart.js';
-import './app.css';
+import './App.css';
 
 type Relatorio = {
   fileDurations: Record<string, number>;
