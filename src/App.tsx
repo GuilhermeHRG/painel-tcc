@@ -17,9 +17,11 @@ type Relatorio = {
   }[];
   inactivityDuration: number;
   timestamp: string;
-  userId: string;
+  machineName: string;
+  machineIp?: string;
   projeto?: string;
 };
+
 
 function formatTime(ms: number): string {
   const sec = Math.floor(ms / 1000) % 60;
@@ -49,7 +51,7 @@ function App() {
       snapshot.forEach((doc) => {
         const data = doc.data() as Relatorio;
         dados.push(data);
-        usersSet.add(data.userId);
+        usersSet.add(data.machineName);
         projectsSet.add(data.projeto || 'sem-projeto');
       });
 
@@ -66,7 +68,7 @@ function App() {
   const fimPadrao = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
 
   const dadosFiltrados = relatorios.filter(r => {
-    const dentroDoUsuario = !userId || r.userId === userId;
+    const dentroDoUsuario = !userId || r.machineName === userId;
     const dentroDoProjeto = !projectName || r.projeto === projectName;
 
     const dataRegistro = new Date(r.timestamp);
@@ -74,16 +76,16 @@ function App() {
       (!dataInicio && !dataFim)
         ? isWithinInterval(dataRegistro, { start: inicioPadrao, end: fimPadrao })
         : isWithinInterval(dataRegistro, {
-            start: dataInicio ? new Date(dataInicio) : new Date('2000-01-01'),
-            end: dataFim ? new Date(dataFim + 'T23:59:59') : new Date('2100-01-01')
-          });
+          start: dataInicio ? new Date(dataInicio) : new Date('2000-01-01'),
+          end: dataFim ? new Date(dataFim + 'T23:59:59') : new Date('2100-01-01')
+        });
 
     return dentroDoUsuario && dentroDaData && dentroDoProjeto;
   });
 
   const totalProdutivoMs = dadosFiltrados.reduce((acc, r) =>
     acc + Object.values(r.fileDurations).reduce((a, b) => a + b, 0)
-  , 0);
+    , 0);
 
   const totalInatividadeMs = dadosFiltrados.reduce((acc, r) =>
     acc + r.inactivityDuration, 0
@@ -100,12 +102,12 @@ function App() {
         (!dataInicio || !dataFim)
           ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
           : isWithinInterval(data, {
-              start: new Date(dataInicio),
-              end: new Date(dataFim + 'T23:59:59'),
-            });
+            start: new Date(dataInicio),
+            end: new Date(dataFim + 'T23:59:59'),
+          });
       return dentroData;
     }).length
-  , 0);
+    , 0);
 
   const totalTempo = totalProdutivoMs + totalInatividadeMs;
   const percentualProdutivo = totalTempo ? (totalProdutivoMs / totalTempo) * 100 : 0;
@@ -175,10 +177,10 @@ function App() {
         </select>
 
         <label>De:</label>
-        <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className='input'/>
+        <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className='input' />
 
         <label>Até:</label>
-        <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} className='input'/>
+        <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} className='input' />
       </div>
 
       <div className="grafico">
@@ -216,9 +218,9 @@ function App() {
                 (!dataInicio || !dataFim)
                   ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
                   : isWithinInterval(data, {
-                      start: new Date(dataInicio),
-                      end: new Date(dataFim + 'T23:59:59')
-                    });
+                    start: new Date(dataInicio),
+                    end: new Date(dataFim + 'T23:59:59')
+                  });
               const dentroTipo = selectedActions.length === 0 || selectedActions.includes(log.action);
               return dentroData && dentroTipo;
             })
@@ -238,13 +240,13 @@ function App() {
               (!dataInicio || !dataFim)
                 ? isWithinInterval(data, { start: inicioPadrao, end: fimPadrao })
                 : isWithinInterval(data, {
-                    start: new Date(dataInicio),
-                    end: new Date(dataFim + 'T23:59:59')
-                  });
+                  start: new Date(dataInicio),
+                  end: new Date(dataFim + 'T23:59:59')
+                });
             const dentroTipo = selectedActions.length === 0 || selectedActions.includes(log.action);
             return dentroData && dentroTipo;
           }).length
-        , 0)
+          , 0)
       } registros exibidos</p>
 
       <button onClick={() => {
